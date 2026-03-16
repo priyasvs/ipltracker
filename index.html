@@ -576,7 +576,17 @@ async function pushToSheet(payload) {
 
 // ── HELPERS ──────────────────────────────────────────────────────────
 function teamById(id){ return TEAMS.find(t=>t.id===id) || {id,name:id,color:'#64748B'} }
-function getSheetRow(matchId){ return sheetData.find(r=>r.id===matchId) || null }
+function getSheetRow(matchId) {
+  // First try exact ID match
+  const exact = sheetData.find(r => r.id === matchId);
+  if (exact) return exact;
+  // Fallback: match by normalised game name using the schedule entry
+  const m = SCHEDULE.find(x => x.id === matchId);
+  if (!m) return null;
+  const norm = s => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
+  const gameNorm = norm(`${m.t1} Vs ${m.t2}`);
+  return sheetData.find(r => norm(r.game) === gameNorm) || null;
+}
 function av(name){ return name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase() }
 
 // ── MATCHES ──────────────────────────────────────────────────────────
