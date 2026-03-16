@@ -284,28 +284,65 @@ const TEAMS = [
   {id:'LSG', name:'Lucknow Super Giants',        color:'#A72B2A'},
 ];
 
+// All kickoff times in IST (UTC+5:30)
+// IST to UTC: subtract 5h30m. 19:30 IST = 14:00 UTC. 15:30 IST = 10:00 UTC
 const SCHEDULE = [
-  {id:'m1', date:'22-Mar',t1:'MI',  t2:'CSK', venue:'Wankhede, Mumbai'},
-  {id:'m2', date:'23-Mar',t1:'KKR', t2:'SRH', venue:'Eden Gardens, Kolkata'},
-  {id:'m3', date:'23-Mar',t1:'RR',  t2:'DC',  venue:'Sawai Mansingh, Jaipur'},
-  {id:'m4', date:'24-Mar',t1:'GT',  t2:'PBKS',venue:'Narendra Modi, Ahmedabad'},
-  {id:'m5', date:'25-Mar',t1:'RCB', t2:'LSG', venue:'Chinnaswamy, Bengaluru'},
-  {id:'m6', date:'26-Mar',t1:'MI',  t2:'KKR', venue:'Wankhede, Mumbai'},
-  {id:'m7', date:'27-Mar',t1:'CSK', t2:'RR',  venue:'Chidambaram, Chennai'},
-  {id:'m8', date:'28-Mar',t1:'DC',  t2:'GT',  venue:'Arun Jaitley, Delhi'},
-  {id:'m9', date:'29-Mar',t1:'SRH', t2:'PBKS',venue:'Rajiv Gandhi, Hyderabad'},
-  {id:'m10',date:'29-Mar',t1:'LSG', t2:'MI',  venue:'Ekana, Lucknow'},
-  {id:'m11',date:'30-Mar',t1:'KKR', t2:'CSK', venue:'Eden Gardens, Kolkata'},
-  {id:'m12',date:'31-Mar',t1:'RR',  t2:'SRH', venue:'Sawai Mansingh, Jaipur'},
-  {id:'m13',date:'1-Apr', t1:'RCB', t2:'GT',  venue:'Chinnaswamy, Bengaluru'},
-  {id:'m14',date:'2-Apr', t1:'MI',  t2:'DC',  venue:'Wankhede, Mumbai'},
-  {id:'m15',date:'3-Apr', t1:'PBKS',t2:'LSG', venue:'Mullanpur, Chandigarh'},
-  {id:'m16',date:'4-Apr', t1:'CSK', t2:'SRH', venue:'Chidambaram, Chennai'},
-  {id:'m17',date:'5-Apr', t1:'GT',  t2:'KKR', venue:'Narendra Modi, Ahmedabad'},
-  {id:'m18',date:'5-Apr', t1:'RR',  t2:'RCB', venue:'Sawai Mansingh, Jaipur'},
-  {id:'m19',date:'6-Apr', t1:'DC',  t2:'PBKS',venue:'Arun Jaitley, Delhi'},
-  {id:'m20',date:'7-Apr', t1:'LSG', t2:'CSK', venue:'Ekana, Lucknow'},
+  {id:'m1', date:'22-Mar',t1:'MI',  t2:'CSK', venue:'Wankhede, Mumbai',       istTime:'19:30', year:2025, month:3,  day:22},
+  {id:'m2', date:'23-Mar',t1:'KKR', t2:'SRH', venue:'Eden Gardens, Kolkata',  istTime:'15:30', year:2025, month:3,  day:23},
+  {id:'m3', date:'23-Mar',t1:'RR',  t2:'DC',  venue:'Sawai Mansingh, Jaipur', istTime:'19:30', year:2025, month:3,  day:23},
+  {id:'m4', date:'24-Mar',t1:'GT',  t2:'PBKS',venue:'Narendra Modi, Ahmedabad',istTime:'19:30',year:2025, month:3,  day:24},
+  {id:'m5', date:'25-Mar',t1:'RCB', t2:'LSG', venue:'Chinnaswamy, Bengaluru', istTime:'19:30', year:2025, month:3,  day:25},
+  {id:'m6', date:'26-Mar',t1:'MI',  t2:'KKR', venue:'Wankhede, Mumbai',       istTime:'19:30', year:2025, month:3,  day:26},
+  {id:'m7', date:'27-Mar',t1:'CSK', t2:'RR',  venue:'Chidambaram, Chennai',   istTime:'19:30', year:2025, month:3,  day:27},
+  {id:'m8', date:'28-Mar',t1:'DC',  t2:'GT',  venue:'Arun Jaitley, Delhi',    istTime:'19:30', year:2025, month:3,  day:28},
+  {id:'m9', date:'29-Mar',t1:'SRH', t2:'PBKS',venue:'Rajiv Gandhi, Hyderabad',istTime:'15:30', year:2025, month:3,  day:29},
+  {id:'m10',date:'29-Mar',t1:'LSG', t2:'MI',  venue:'Ekana, Lucknow',         istTime:'19:30', year:2025, month:3,  day:29},
+  {id:'m11',date:'30-Mar',t1:'KKR', t2:'CSK', venue:'Eden Gardens, Kolkata',  istTime:'19:30', year:2025, month:3,  day:30},
+  {id:'m12',date:'31-Mar',t1:'RR',  t2:'SRH', venue:'Sawai Mansingh, Jaipur', istTime:'19:30', year:2025, month:3,  day:31},
+  {id:'m13',date:'1-Apr', t1:'RCB', t2:'GT',  venue:'Chinnaswamy, Bengaluru', istTime:'19:30', year:2025, month:4,  day:1},
+  {id:'m14',date:'2-Apr', t1:'MI',  t2:'DC',  venue:'Wankhede, Mumbai',       istTime:'19:30', year:2025, month:4,  day:2},
+  {id:'m15',date:'3-Apr', t1:'PBKS',t2:'LSG', venue:'Mullanpur, Chandigarh',  istTime:'19:30', year:2025, month:4,  day:3},
+  {id:'m16',date:'4-Apr', t1:'CSK', t2:'SRH', venue:'Chidambaram, Chennai',   istTime:'19:30', year:2025, month:4,  day:4},
+  {id:'m17',date:'5-Apr', t1:'GT',  t2:'KKR', venue:'Narendra Modi, Ahmedabad',istTime:'15:30',year:2025, month:4,  day:5},
+  {id:'m18',date:'5-Apr', t1:'RR',  t2:'RCB', venue:'Sawai Mansingh, Jaipur', istTime:'19:30', year:2025, month:4,  day:5},
+  {id:'m19',date:'6-Apr', t1:'DC',  t2:'PBKS',venue:'Arun Jaitley, Delhi',    istTime:'19:30', year:2025, month:4,  day:6},
+  {id:'m20',date:'7-Apr', t1:'LSG', t2:'CSK', venue:'Ekana, Lucknow',         istTime:'19:30', year:2025, month:4,  day:7},
 ];
+
+// Returns kickoff time as UTC Date object
+function matchKickoffUTC(m) {
+  if (!m.year) return null;
+  const [hh, mm] = m.istTime.split(':').map(Number);
+  // IST = UTC+5:30, so UTC = IST - 5h30m
+  const utc = Date.UTC(m.year, m.month - 1, m.day, hh - 5, mm - 30);
+  return new Date(utc);
+}
+
+// Returns true if picks should be locked (within 30 mins of kickoff or past it)
+function isPicksLocked(mid) {
+  if (isAdmin()) return false; // admins never locked
+  const m = SCHEDULE.find(x => x.id === mid);
+  if (!m) return false;
+  const kickoff = matchKickoffUTC(m);
+  if (!kickoff) return false;
+  const now = new Date();
+  const minsToKickoff = (kickoff - now) / 60000;
+  return minsToKickoff <= 30; // locked if 30 mins or less to kickoff
+}
+
+// Returns a human-readable lock status string
+function lockStatus(mid) {
+  const m = SCHEDULE.find(x => x.id === mid);
+  if (!m) return '';
+  const kickoff = matchKickoffUTC(m);
+  if (!kickoff) return '';
+  const now = new Date();
+  const minsToKickoff = (kickoff - now) / 60000;
+  if (minsToKickoff <= 0) return '🔒 Started';
+  if (minsToKickoff <= 30) return `🔒 Locks in ${Math.ceil(minsToKickoff)}m`;
+  if (minsToKickoff <= 60) return `⏰ ${Math.ceil(minsToKickoff)}m to lock`;
+  return '';
+}
 
 // ── STATE ────────────────────────────────────────────────────────────
 // URL param handled in window.onload
@@ -441,10 +478,11 @@ function logoutUser() {
 }
 
 function isAdmin() { return currentUser?.isAdmin === true; }
-function canEditMatch(matchWinner) {
+function canEditMatch(matchWinner, matchId) {
   if (isAdmin()) return true;
-  if (matchWinner) return false; // locked once winner declared
-  return true; // open match, anyone can enter their own pick
+  if (matchWinner) return false;       // locked once winner declared
+  if (matchId && isPicksLocked(matchId)) return false; // locked 30 mins before kickoff
+  return true;
 }
 
 // ── INIT ─────────────────────────────────────────────────────────────
@@ -500,9 +538,20 @@ function initApp() {
   if (scriptUrl) {
     showApp();
     syncAll();
+    startLockTimer();
   } else {
     document.getElementById('cfg-screen').style.display = 'flex';
   }
+}
+
+// Re-render matches every minute so lock countdown stays accurate
+function startLockTimer() {
+  setInterval(() => {
+    const activeTab = document.querySelector('.tab.active');
+    if (activeTab && activeTab.textContent.trim() === 'Matches') {
+      renderMatches();
+    }
+  }, 60000); // every 60 seconds
 }
 
 
@@ -637,7 +686,10 @@ function renderMatches() {
       <div class="match-venue">📍 ${m.venue}</div>
       ${picksHtml}
       <div class="match-actions" style="align-items:center">
-        ${canEditMatch(winner) ? `<button class="btn-sm primary" onclick="openPicksModal('${m.id}')">✏ ${isAdmin() ? 'All Picks' : 'My Pick & View'}</button>` : `<button class="btn-sm" disabled style="opacity:.4;cursor:not-allowed">🔒 Locked</button>`}
+        ${canEditMatch(winner, m.id)
+          ? `<button class="btn-sm primary" onclick="openPicksModal('${m.id}')">✏ ${isAdmin() ? 'All Picks' : 'My Pick & View'}</button>`
+          : `<button class="btn-sm" disabled style="opacity:.4;cursor:not-allowed">${winner ? '🔒 Result In' : isPicksLocked(m.id) ? '🔒 Picks Locked' : '🔒 Locked'}</button>`}
+        ${!isAdmin() && !winner && lockStatus(m.id) ? `<span style="font-size:10px;color:var(--yellow);font-weight:600">${lockStatus(m.id)}</span>` : ''}
         ${isAdmin() ? `<button class="btn-sm" onclick="openWinModal('${m.id}')">🏆 Result</button>` : ''}
         ${isAdmin() ? `
         <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
@@ -664,7 +716,7 @@ function openPicksModal(mid) {
   document.getElementById('picks-modal-sub').textContent = `${m.date} · ${m.venue}`;
 
   const myName = currentUser?.name;
-  const matchLocked = !canEditMatch(row?.winner);
+  const matchLocked = !canEditMatch(row?.winner, mid);
 
   let html = '';
 
