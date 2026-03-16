@@ -146,7 +146,6 @@ html,body{height:100%;background:var(--dark);color:var(--text);font-family:var(-
   <!-- Step 1: pick your name -->
   <div id="login-step1" style="width:100%;max-width:340px">
     <div style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:12px">Who are you?</div>
-    <div id="pins-status" style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:6px"></div>
     <div id="player-select-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
   </div>
 
@@ -363,12 +362,7 @@ let sheetPins    = {};    // loaded from sheet on app start {playerName: '1234'}
 function buildPlayerGrid() {
   const grid = document.getElementById('player-select-grid');
   if (!grid) return;
-  const statusEl = document.getElementById('pins-status');
-  if (statusEl) {
-    const count = Object.keys(PLAYER_PINS).length;
-    statusEl.textContent = count > 0 ? count + ' PINs loaded from sheet' : '⚠ No PINs loaded — check sheet connection';
-    statusEl.style.color = count > 0 ? 'var(--green-t)' : 'var(--red)';
-  }
+
   grid.innerHTML = PLAYERS.map((p, i) => `
     <button onclick="selectLoginPlayer('${p}')"
       style="padding:12px 8px;border-radius:12px;border:1px solid var(--border);background:var(--card);
