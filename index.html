@@ -497,23 +497,22 @@ window.onload = async () => {
     window.history.replaceState({}, '', window.location.pathname);
   }
 
-  // Step 2: load PINs + Schedule in parallel before showing login screen
+  // Step 2: load PINs first — this is critical for login, must not fail
   if (scriptUrl) {
     try {
-      const [pinsRes, schedRes, teamsRes] = await Promise.all([
-        fetch(`${scriptUrl}?action=getPins`),
-        fetch(`${scriptUrl}?action=getSchedule`),
-        fetch(`${scriptUrl}?action=getTeams`)
-      ]);
-      const pinsJson  = await pinsRes.json();
-      const schedJson = await schedRes.json();
-      const teamsJson = await teamsRes.json();
-
-      // Load PINs
+      const pinsRes  = await fetch(`${scriptUrl}?action=getPins`);
+      const pinsJson = await pinsRes.json();
       PLAYER_PINS = pinsJson.pins || pinsJson || {};
       console.log('PINs loaded:', Object.keys(PLAYER_PINS).length);
+    } catch(e) {
+      PLAYER_PINS = {};
+      console.log('PINs fetch failed:', e);
+    }
 
-      // Load Schedule — replace hardcoded SCHEDULE with live data
+    // Load Schedule independently — failure here never affects login
+    try {
+      const schedRes  = await fetch(`${scriptUrl}?action=getSchedule`);
+      const schedJson = await schedRes.json();
       if (schedJson.schedule && schedJson.schedule.length) {
         SCHEDULE.length = 0;
         schedJson.schedule.forEach((m, i) => {
@@ -526,27 +525,27 @@ window.onload = async () => {
             kickoffUTC: m.time || m.kickoffUTC || null,
           });
         });
-        console.log('Schedule loaded:', SCHEDULE.length, 'matches, source:', schedJson.source);
+        console.log('Schedule loaded:', SCHEDULE.length, 'matches');
       }
+    } catch(e) { console.log('Schedule fetch failed (using hardcoded):', e); }
 
-      // Load Teams — update TEAMS with live data + squads
+    // Load Teams independently — failure here never affects login
+    try {
+      const teamsRes  = await fetch(`${scriptUrl}?action=getTeams`);
+      const teamsJson = await teamsRes.json();
       if (teamsJson.teams && teamsJson.teams.length) {
         teamsJson.teams.forEach(apiTeam => {
           const existing = TEAMS.find(t => t.id === apiTeam.code);
           if (existing) {
-            // Update name and squad, keep our color
             existing.name  = apiTeam.name || existing.name;
             existing.squad = apiTeam.players || [];
           } else {
             TEAMS.push({ id: apiTeam.code, name: apiTeam.name, color: '#888888', squad: apiTeam.players || [] });
           }
         });
-        console.log('Teams loaded:', teamsJson.teams.length, 'teams, source:', teamsJson.source);
+        console.log('Teams loaded:', teamsJson.teams.length);
       }
-    } catch(e) {
-      PLAYER_PINS = {};
-      console.log('Pre-login fetch failed:', e);
-    }
+    } catch(e) { console.log('Teams fetch failed (using hardcoded):', e); }
   }
 
   // Step 3: restore session if still active
@@ -577,37 +576,12 @@ async function initApp() {
     showApp();
     // Fetch schedule + teams in parallel with match data
     syncAll();
-    fetchSchedule(); // background refresh in case schedule changed
     startLockTimer();
   } else {
     document.getElementById('cfg-screen').style.display = 'flex';
   }
 }
 
-async function fetchSchedule() {
-  try {
-    const res  = await fetch(`${scriptUrl}?action=getSchedule`);
-    const json = await res.json();
-    if (json.schedule && json.schedule.length) {
-      // Merge API schedule into SCHEDULE array — add any new matches not already there
-      json.schedule.forEach(m => {
-        const exists = SCHEDULE.find(s => s.id === m.id ||
-          (normaliseStr(s.t1 + s.t2) === normaliseStr(m.t1 + m.t2) && s.date === m.date));
-        if (!exists) SCHEDULE.push(m);
-        else {
-          // Update time if we have it from API
-          if (m.time) exists.kickoffUTC = m.time;
-        }
-      });
-      // Also update kickoff times on existing matches
-      json.schedule.forEach(m => {
-        const existing = SCHEDULE.find(s => s.id === m.id);
-        if (existing && m.time) existing.kickoffUTC = m.time;
-      });
-      renderMatches();
-    }
-  } catch(e) { console.log('Schedule fetch failed:', e); }
-}
 
 
 function normaliseStr(s) { return String(s).toLowerCase().replace(/[^a-z0-9]/g,''); }
