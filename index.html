@@ -396,12 +396,14 @@ function getRow(mid){
 
 // ─── STARTUP ─────────────────────────────────────────────────────────────────
 window.onload = async () => {
-  // Grab ?sheet= param
-  const p = new URLSearchParams(location.search);
-  if(p.get('sheet')){
-    scriptUrl = p.get('sheet');
+  // Grab ?sheet= param — URLSearchParams handles all special characters correctly
+  const urlParams = new URLSearchParams(window.location.search);
+  const sheetParam = urlParams.get('sheet');
+  if(sheetParam && sheetParam.startsWith('https://')){
+    scriptUrl = sheetParam;
     localStorage.setItem(SU_KEY, scriptUrl);
-    history.replaceState({},'',' ');
+    // Remove the param from URL bar cleanly
+    window.history.replaceState({}, document.title, window.location.pathname);
   }
 
   // Load PINs (only pre-login fetch)
