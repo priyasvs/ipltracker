@@ -1027,17 +1027,27 @@ function renderLeaderboard() {
 }
 
 // ── SETTINGS ─────────────────────────────────────────────────────────
+// Track which teams are expanded
+const expandedTeams = new Set();
+
+function toggleTeam(teamId) {
+  if (expandedTeams.has(teamId)) expandedTeams.delete(teamId);
+  else expandedTeams.add(teamId);
+  renderTeams();
+}
+
 function renderTeams() {
   const el = document.getElementById('tab-teams');
   if (!TEAMS.length) { el.innerHTML = '<div class="empty">Loading teams...</div>'; return; }
 
   el.innerHTML = TEAMS.map((t, ti) => {
-    const squad = t.squad || [];
-    const batters   = squad.filter(p => p.role && p.role.toLowerCase().includes('bat'));
-    const bowlers   = squad.filter(p => p.role && (p.role.toLowerCase().includes('bowl') || p.role.toLowerCase().includes('paceman') || p.role.toLowerCase().includes('spinner')));
+    const squad       = t.squad || [];
+    const isExpanded  = expandedTeams.has(t.id);
+    const batters     = squad.filter(p => p.role && p.role.toLowerCase().includes('bat'));
+    const bowlers     = squad.filter(p => p.role && (p.role.toLowerCase().includes('bowl') || p.role.toLowerCase().includes('paceman') || p.role.toLowerCase().includes('spinner')));
     const allrounders = squad.filter(p => p.role && p.role.toLowerCase().includes('all'));
-    const keepers   = squad.filter(p => p.role && p.role.toLowerCase().includes('keep'));
-    const others    = squad.filter(p => !batters.includes(p) && !bowlers.includes(p) && !allrounders.includes(p) && !keepers.includes(p));
+    const keepers     = squad.filter(p => p.role && p.role.toLowerCase().includes('keep'));
+    const others      = squad.filter(p => !batters.includes(p) && !bowlers.includes(p) && !allrounders.includes(p) && !keepers.includes(p));
 
     const renderGroup = (label, players) => players.length ? `
       <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:10px 0 5px">${label}</div>
@@ -1051,15 +1061,16 @@ function renderTeams() {
           <div style="font-size:10px;padding:2px 7px;border-radius:10px;background:${t.color}22;color:${t.color};font-weight:600">${p.role||''}</div>
         </div>`).join('')}` : '';
 
-    return `<div class="match-card" style="margin-bottom:12px">
-      <div style="display:flex;align-items:center;gap:12px;padding:14px 14px 10px">
-        <div style="width:44px;height:44px;border-radius:12px;background:${t.color};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0">${t.id}</div>
-        <div>
-          <div style="font-family:var(--font-h);font-size:20px;font-weight:700;color:var(--text)">${t.name}</div>
-          ${squad.length ? `<div style="font-size:11px;color:var(--muted)">${squad.length} players</div>` : '<div style="font-size:11px;color:var(--muted)">Squad loading...</div>'}
+    return `<div class="match-card" style="margin-bottom:10px;overflow:hidden">
+      <div onclick="toggleTeam('${t.id}')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;user-select:none">
+        <div style="width:40px;height:40px;border-radius:10px;background:${t.color};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0">${t.id}</div>
+        <div style="flex:1">
+          <div style="font-family:var(--font-h);font-size:20px;font-weight:700;color:var(--text);line-height:1">${t.name}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">${squad.length ? squad.length + ' players' : 'Squad loading...'}</div>
         </div>
+        <div style="font-size:18px;color:var(--muted);transition:transform .2s;transform:rotate(${isExpanded?'90':'0'}deg)">›</div>
       </div>
-      ${squad.length ? `<div style="padding:0 14px 14px">
+      ${isExpanded && squad.length ? `<div style="padding:0 14px 14px;border-top:1px solid var(--border)">
         ${renderGroup('Batters', batters)}
         ${renderGroup('All-rounders', allrounders)}
         ${renderGroup('Bowlers', bowlers)}
