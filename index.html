@@ -497,55 +497,51 @@ window.onload = async () => {
     window.history.replaceState({}, '', window.location.pathname);
   }
 
-  // Step 2: load PINs first — this is critical for login, must not fail
+  // Step 2: load PINs, schedule and teams — all with timeout so login never hangs
   if (scriptUrl) {
-    try {
-      const pinsRes  = await fetch(`${scriptUrl}?action=getPins`);
-      const pinsJson = await pinsRes.json();
-      PLAYER_PINS = pinsJson.pins || pinsJson || {};
+    const withTimeout = (promise, ms=8000) => Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms))
+    ]);
+
+    const [pinsResult, schedResult, teamsResult] = await Promise.allSettled([
+      withTimeout(fetch(`${scriptUrl}?action=getPins`).then(r=>r.json())),
+      withTimeout(fetch(`${scriptUrl}?action=getSchedule`).then(r=>r.json())),
+      withTimeout(fetch(`${scriptUrl}?action=getTeams`).then(r=>r.json())),
+    ]);
+
+    // PINs — critical for login
+    if (pinsResult.status === 'fulfilled') {
+      const j = pinsResult.value;
+      PLAYER_PINS = j.pins || j || {};
       console.log('PINs loaded:', Object.keys(PLAYER_PINS).length);
-    } catch(e) {
-      PLAYER_PINS = {};
-      console.log('PINs fetch failed:', e);
+    } else {
+      console.log('PINs failed:', pinsResult.reason);
     }
 
-    // Load Schedule independently — failure here never affects login
-    try {
-      const schedRes  = await fetch(`${scriptUrl}?action=getSchedule`);
-      const schedJson = await schedRes.json();
-      if (schedJson.schedule && schedJson.schedule.length) {
-        SCHEDULE.length = 0;
-        schedJson.schedule.forEach((m, i) => {
-          SCHEDULE.push({
-            id:         m.id || 'm' + (i+1),
-            date:       m.date || '',
-            t1:         m.t1 || '',
-            t2:         m.t2 || '',
-            venue:      m.venue || '',
-            kickoffUTC: m.time || m.kickoffUTC || null,
-          });
-        });
-        console.log('Schedule loaded:', SCHEDULE.length, 'matches');
-      }
-    } catch(e) { console.log('Schedule fetch failed (using hardcoded):', e); }
+    // Schedule — nice to have, fallback to hardcoded 2026
+    if (schedResult.status === 'fulfilled' && schedResult.value.schedule?.length) {
+      SCHEDULE.length = 0;
+      schedResult.value.schedule.forEach((m, i) => SCHEDULE.push({
+        id: m.id || 'm'+(i+1), date: m.date||'', t1: m.t1||'', t2: m.t2||'',
+        venue: m.venue||'', kickoffUTC: m.time || m.kickoffUTC || null,
+      }));
+      console.log('Schedule loaded:', SCHEDULE.length, 'matches');
+    } else {
+      console.log('Schedule failed/empty, using hardcoded:', schedResult.reason||'empty');
+    }
 
-    // Load Teams independently — failure here never affects login
-    try {
-      const teamsRes  = await fetch(`${scriptUrl}?action=getTeams`);
-      const teamsJson = await teamsRes.json();
-      if (teamsJson.teams && teamsJson.teams.length) {
-        teamsJson.teams.forEach(apiTeam => {
-          const existing = TEAMS.find(t => t.id === apiTeam.code);
-          if (existing) {
-            existing.name  = apiTeam.name || existing.name;
-            existing.squad = apiTeam.players || [];
-          } else {
-            TEAMS.push({ id: apiTeam.code, name: apiTeam.name, color: '#888888', squad: apiTeam.players || [] });
-          }
-        });
-        console.log('Teams loaded:', teamsJson.teams.length);
-      }
-    } catch(e) { console.log('Teams fetch failed (using hardcoded):', e); }
+    // Teams — nice to have, fallback to hardcoded
+    if (teamsResult.status === 'fulfilled' && teamsResult.value.teams?.length) {
+      teamsResult.value.teams.forEach(apiTeam => {
+        const existing = TEAMS.find(t => t.id === apiTeam.code);
+        if (existing) { existing.name = apiTeam.name||existing.name; existing.squad = apiTeam.players||[]; }
+        else TEAMS.push({id:apiTeam.code, name:apiTeam.name, color:'#888888', squad:apiTeam.players||[]});
+      });
+      console.log('Teams loaded:', teamsResult.value.teams.length);
+    } else {
+      console.log('Teams failed/empty, using hardcoded:', teamsResult.reason||'empty');
+    }
   }
 
   // Step 3: restore session if still active
