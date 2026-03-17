@@ -512,9 +512,11 @@ function backToStep1() {
 }
 
 function pinKey(n) {
+  if (!loginTarget) { console.log('pinKey: no loginTarget'); return; }
   if (pinEntry.length >= 4) return;
   pinEntry += String(n);
   updatePinDots();
+  console.log('pinKey:', n, 'entry now:', pinEntry, 'target:', loginTarget);
   if (pinEntry.length === 4) setTimeout(checkPin, 150);
 }
 function pinDel() {
