@@ -869,7 +869,7 @@ function drawTeams(){
           <div class="team-name">${t.name}</div>
           <div class="team-sub">Tap to ${open?'collapse':'expand'}</div>
         </div>
-        <div class="team-chevron${open?' open'}">›</div>
+        <div class="team-chevron${open?' open':''}">›</div>
       </div>
       ${open?`<div class="squad-body"><div class="empty" style="padding:16px">Squad details coming soon</div></div>`:''}
     </div>`;
