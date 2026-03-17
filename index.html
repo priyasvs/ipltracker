@@ -272,7 +272,8 @@ let matchPts = JSON.parse(localStorage.getItem(MATCH_PTS_KEY) || '{}');
 function getMatchPts(mid) { return matchPts[mid] || BET_AMOUNT; }
 function setMatchPts(mid, val) { matchPts[mid] = val; localStorage.setItem(MATCH_PTS_KEY, JSON.stringify(matchPts)); }
 
-const TEAMS = [
+// IPL 2026 teams — loaded from API on startup, this is the fallback
+let TEAMS = [
   {id:'MI',  name:'Mumbai Indians',              color:'#005DA0'},
   {id:'CSK', name:'Chennai Super Kings',         color:'#FDB913'},
   {id:'RCB', name:'Royal Challengers Bengaluru', color:'#D41B2C'},
@@ -285,29 +286,29 @@ const TEAMS = [
   {id:'LSG', name:'Lucknow Super Giants',        color:'#A72B2A'},
 ];
 
-// All kickoff times in IST (UTC+5:30)
-// IST to UTC: subtract 5h30m. 19:30 IST = 14:00 UTC. 15:30 IST = 10:00 UTC
-const SCHEDULE = [
-  {id:'m1', date:'22-Mar',t1:'MI',  t2:'CSK', venue:'Wankhede, Mumbai',       istTime:'19:30', year:2025, month:3,  day:22},
-  {id:'m2', date:'23-Mar',t1:'KKR', t2:'SRH', venue:'Eden Gardens, Kolkata',  istTime:'15:30', year:2025, month:3,  day:23},
-  {id:'m3', date:'23-Mar',t1:'RR',  t2:'DC',  venue:'Sawai Mansingh, Jaipur', istTime:'19:30', year:2025, month:3,  day:23},
-  {id:'m4', date:'24-Mar',t1:'GT',  t2:'PBKS',venue:'Narendra Modi, Ahmedabad',istTime:'19:30',year:2025, month:3,  day:24},
-  {id:'m5', date:'25-Mar',t1:'RCB', t2:'LSG', venue:'Chinnaswamy, Bengaluru', istTime:'19:30', year:2025, month:3,  day:25},
-  {id:'m6', date:'26-Mar',t1:'MI',  t2:'KKR', venue:'Wankhede, Mumbai',       istTime:'19:30', year:2025, month:3,  day:26},
-  {id:'m7', date:'27-Mar',t1:'CSK', t2:'RR',  venue:'Chidambaram, Chennai',   istTime:'19:30', year:2025, month:3,  day:27},
-  {id:'m8', date:'28-Mar',t1:'DC',  t2:'GT',  venue:'Arun Jaitley, Delhi',    istTime:'19:30', year:2025, month:3,  day:28},
-  {id:'m9', date:'29-Mar',t1:'SRH', t2:'PBKS',venue:'Rajiv Gandhi, Hyderabad',istTime:'15:30', year:2025, month:3,  day:29},
-  {id:'m10',date:'29-Mar',t1:'LSG', t2:'MI',  venue:'Ekana, Lucknow',         istTime:'19:30', year:2025, month:3,  day:29},
-  {id:'m11',date:'30-Mar',t1:'KKR', t2:'CSK', venue:'Eden Gardens, Kolkata',  istTime:'19:30', year:2025, month:3,  day:30},
-  {id:'m12',date:'31-Mar',t1:'RR',  t2:'SRH', venue:'Sawai Mansingh, Jaipur', istTime:'19:30', year:2025, month:3,  day:31},
-  {id:'m13',date:'1-Apr', t1:'RCB', t2:'GT',  venue:'Chinnaswamy, Bengaluru', istTime:'19:30', year:2025, month:4,  day:1},
-  {id:'m14',date:'2-Apr', t1:'MI',  t2:'DC',  venue:'Wankhede, Mumbai',       istTime:'19:30', year:2025, month:4,  day:2},
-  {id:'m15',date:'3-Apr', t1:'PBKS',t2:'LSG', venue:'Mullanpur, Chandigarh',  istTime:'19:30', year:2025, month:4,  day:3},
-  {id:'m16',date:'4-Apr', t1:'CSK', t2:'SRH', venue:'Chidambaram, Chennai',   istTime:'19:30', year:2025, month:4,  day:4},
-  {id:'m17',date:'5-Apr', t1:'GT',  t2:'KKR', venue:'Narendra Modi, Ahmedabad',istTime:'15:30',year:2025, month:4,  day:5},
-  {id:'m18',date:'5-Apr', t1:'RR',  t2:'RCB', venue:'Sawai Mansingh, Jaipur', istTime:'19:30', year:2025, month:4,  day:5},
-  {id:'m19',date:'6-Apr', t1:'DC',  t2:'PBKS',venue:'Arun Jaitley, Delhi',    istTime:'19:30', year:2025, month:4,  day:6},
-  {id:'m20',date:'7-Apr', t1:'LSG', t2:'CSK', venue:'Ekana, Lucknow',         istTime:'19:30', year:2025, month:4,  day:7},
+// IPL 2026 schedule — loaded from API on startup, this is the fallback
+// Use 'let' so it can be replaced by live API data
+let SCHEDULE = [
+  {id:'m1', date:'28-Mar',t1:'RCB', t2:'SRH', venue:'M. Chinnaswamy, Bengaluru',   kickoffUTC:'2026-03-28T14:00:00Z'},
+  {id:'m2', date:'29-Mar',t1:'MI',  t2:'KKR', venue:'Wankhede, Mumbai',             kickoffUTC:'2026-03-29T14:00:00Z'},
+  {id:'m3', date:'30-Mar',t1:'RR',  t2:'CSK', venue:'Barsapara, Guwahati',          kickoffUTC:'2026-03-30T14:00:00Z'},
+  {id:'m4', date:'31-Mar',t1:'PBKS',t2:'GT',  venue:'Mullanpur, Chandigarh',        kickoffUTC:'2026-03-31T14:00:00Z'},
+  {id:'m5', date:'1-Apr', t1:'LSG', t2:'DC',  venue:'Ekana, Lucknow',               kickoffUTC:'2026-04-01T14:00:00Z'},
+  {id:'m6', date:'2-Apr', t1:'KKR', t2:'SRH', venue:'Eden Gardens, Kolkata',        kickoffUTC:'2026-04-02T14:00:00Z'},
+  {id:'m7', date:'3-Apr', t1:'CSK', t2:'PBKS',venue:'MA Chidambaram, Chennai',      kickoffUTC:'2026-04-03T14:00:00Z'},
+  {id:'m8', date:'4-Apr', t1:'DC',  t2:'MI',  venue:'Arun Jaitley, Delhi',          kickoffUTC:'2026-04-04T10:00:00Z'},
+  {id:'m9', date:'4-Apr', t1:'GT',  t2:'RR',  venue:'Narendra Modi, Ahmedabad',     kickoffUTC:'2026-04-04T14:00:00Z'},
+  {id:'m10',date:'5-Apr', t1:'SRH', t2:'LSG', venue:'Rajiv Gandhi, Hyderabad',      kickoffUTC:'2026-04-05T10:00:00Z'},
+  {id:'m11',date:'5-Apr', t1:'RCB', t2:'CSK', venue:'M. Chinnaswamy, Bengaluru',    kickoffUTC:'2026-04-05T14:00:00Z'},
+  {id:'m12',date:'6-Apr', t1:'KKR', t2:'PBKS',venue:'MA Chidambaram, Chennai',      kickoffUTC:'2026-04-06T14:00:00Z'},
+  {id:'m13',date:'7-Apr', t1:'RR',  t2:'MI',  venue:'Barsapara, Guwahati',          kickoffUTC:'2026-04-07T14:00:00Z'},
+  {id:'m14',date:'8-Apr', t1:'DC',  t2:'GT',  venue:'Arun Jaitley, Delhi',          kickoffUTC:'2026-04-08T14:00:00Z'},
+  {id:'m15',date:'9-Apr', t1:'KKR', t2:'LSG', venue:'Eden Gardens, Kolkata',        kickoffUTC:'2026-04-09T14:00:00Z'},
+  {id:'m16',date:'10-Apr',t1:'RR',  t2:'RCB', venue:'Barsapara, Guwahati',          kickoffUTC:'2026-04-10T14:00:00Z'},
+  {id:'m17',date:'11-Apr',t1:'PBKS',t2:'SRH', venue:'Mullanpur, Chandigarh',        kickoffUTC:'2026-04-11T10:00:00Z'},
+  {id:'m18',date:'11-Apr',t1:'CSK', t2:'DC',  venue:'MA Chidambaram, Chennai',      kickoffUTC:'2026-04-11T14:00:00Z'},
+  {id:'m19',date:'12-Apr',t1:'LSG', t2:'GT',  venue:'Ekana, Lucknow',               kickoffUTC:'2026-04-12T10:00:00Z'},
+  {id:'m20',date:'12-Apr',t1:'MI',  t2:'RCB', venue:'Wankhede, Mumbai',             kickoffUTC:'2026-04-12T14:00:00Z'},
 ];
 
 // Returns kickoff time as UTC Date object
@@ -496,18 +497,55 @@ window.onload = async () => {
     window.history.replaceState({}, '', window.location.pathname);
   }
 
-  // Step 2: load PINs from sheet — needed before login screen shown
+  // Step 2: load PINs + Schedule in parallel before showing login screen
   if (scriptUrl) {
-    const statusEl = document.getElementById('pins-status');
-    if (statusEl) statusEl.textContent = 'Loading...';
     try {
-      const res  = await fetch(`${scriptUrl}?action=getPins`);
-      const json = await res.json();
-      PLAYER_PINS = json.pins || json || {};
-      console.log('PINs loaded:', JSON.stringify(PLAYER_PINS));
+      const [pinsRes, schedRes, teamsRes] = await Promise.all([
+        fetch(`${scriptUrl}?action=getPins`),
+        fetch(`${scriptUrl}?action=getSchedule`),
+        fetch(`${scriptUrl}?action=getTeams`)
+      ]);
+      const pinsJson  = await pinsRes.json();
+      const schedJson = await schedRes.json();
+      const teamsJson = await teamsRes.json();
+
+      // Load PINs
+      PLAYER_PINS = pinsJson.pins || pinsJson || {};
+      console.log('PINs loaded:', Object.keys(PLAYER_PINS).length);
+
+      // Load Schedule — replace hardcoded SCHEDULE with live data
+      if (schedJson.schedule && schedJson.schedule.length) {
+        SCHEDULE.length = 0;
+        schedJson.schedule.forEach((m, i) => {
+          SCHEDULE.push({
+            id:         m.id || 'm' + (i+1),
+            date:       m.date || '',
+            t1:         m.t1 || '',
+            t2:         m.t2 || '',
+            venue:      m.venue || '',
+            kickoffUTC: m.time || m.kickoffUTC || null,
+          });
+        });
+        console.log('Schedule loaded:', SCHEDULE.length, 'matches, source:', schedJson.source);
+      }
+
+      // Load Teams — update TEAMS with live data + squads
+      if (teamsJson.teams && teamsJson.teams.length) {
+        teamsJson.teams.forEach(apiTeam => {
+          const existing = TEAMS.find(t => t.id === apiTeam.code);
+          if (existing) {
+            // Update name and squad, keep our color
+            existing.name  = apiTeam.name || existing.name;
+            existing.squad = apiTeam.players || [];
+          } else {
+            TEAMS.push({ id: apiTeam.code, name: apiTeam.name, color: '#888888', squad: apiTeam.players || [] });
+          }
+        });
+        console.log('Teams loaded:', teamsJson.teams.length, 'teams, source:', teamsJson.source);
+      }
     } catch(e) {
       PLAYER_PINS = {};
-      console.log('getPins failed:', e);
+      console.log('Pre-login fetch failed:', e);
     }
   }
 
@@ -539,8 +577,7 @@ async function initApp() {
     showApp();
     // Fetch schedule + teams in parallel with match data
     syncAll();
-    fetchSchedule();
-    fetchTeams();
+    fetchSchedule(); // background refresh in case schedule changed
     startLockTimer();
   } else {
     document.getElementById('cfg-screen').style.display = 'flex';
@@ -572,21 +609,6 @@ async function fetchSchedule() {
   } catch(e) { console.log('Schedule fetch failed:', e); }
 }
 
-async function fetchTeams() {
-  try {
-    const res  = await fetch(`${scriptUrl}?action=getTeams`);
-    const json = await res.json();
-    if (json.teams && json.teams.length) {
-      sheetTeams = json.teams;
-      // Update TEAMS array with API data
-      sheetTeams.forEach(t => {
-        const existing = TEAMS.find(x => x.id === t.code);
-        if (existing) existing.squad = t.players;
-        else TEAMS.push({id: t.code, name: t.name, color: '#888888', squad: t.players});
-      });
-    }
-  } catch(e) { console.log('Teams fetch failed:', e); }
-}
 
 function normaliseStr(s) { return String(s).toLowerCase().replace(/[^a-z0-9]/g,''); }
 
