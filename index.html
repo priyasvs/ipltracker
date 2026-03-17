@@ -272,18 +272,129 @@ let matchPts = JSON.parse(localStorage.getItem(MATCH_PTS_KEY) || '{}');
 function getMatchPts(mid) { return matchPts[mid] || BET_AMOUNT; }
 function setMatchPts(mid, val) { matchPts[mid] = val; localStorage.setItem(MATCH_PTS_KEY, JSON.stringify(matchPts)); }
 
-// IPL 2026 teams — loaded from API on startup, this is the fallback
-let TEAMS = [
-  {id:'MI',  name:'Mumbai Indians',              color:'#005DA0'},
-  {id:'CSK', name:'Chennai Super Kings',         color:'#FDB913'},
-  {id:'RCB', name:'Royal Challengers Bengaluru', color:'#D41B2C'},
-  {id:'KKR', name:'Kolkata Knight Riders',       color:'#3A225D'},
-  {id:'DC',  name:'Delhi Capitals',              color:'#0078BC'},
-  {id:'SRH', name:'Sunrisers Hyderabad',         color:'#F7A721'},
-  {id:'PBKS',name:'Punjab Kings',                color:'#ED1B24'},
-  {id:'RR',  name:'Rajasthan Royals',            color:'#254AA5'},
-  {id:'GT',  name:'Gujarat Titans',              color:'#1C3B6B'},
-  {id:'LSG', name:'Lucknow Super Giants',        color:'#A72B2A'},
+// IPL 2026 teams — hardcoded with known squads
+const TEAMS = [
+  {id:'MI',  name:'Mumbai Indians',              color:'#005DA0', squad:[
+    {name:'Rohit Sharma',       role:'Batter',       country:'India'},
+    {name:'Suryakumar Yadav',   role:'Batter',       country:'India'},
+    {name:'Tilak Varma',        role:'Batter',       country:'India'},
+    {name:'Hardik Pandya',      role:'All-rounder',  country:'India'},
+    {name:'Kieron Pollard',     role:'All-rounder',  country:'West Indies'},
+    {name:'Ishan Kishan',       role:'Wicket-keeper',country:'India'},
+    {name:'Jasprit Bumrah',     role:'Bowler',       country:'India'},
+    {name:'Trent Boult',        role:'Bowler',       country:'New Zealand'},
+    {name:'Mohammed Siraj',     role:'Bowler',       country:'India'},
+    {name:'Naman Dhir',         role:'Batter',       country:'India'},
+    {name:'Robin Minz',         role:'Wicket-keeper',country:'India'},
+  ]},
+  {id:'CSK', name:'Chennai Super Kings',         color:'#FDB913', squad:[
+    {name:'Ruturaj Gaikwad',    role:'Batter',       country:'India'},
+    {name:'Devon Conway',       role:'Batter',       country:'New Zealand'},
+    {name:'MS Dhoni',           role:'Wicket-keeper',country:'India'},
+    {name:'Shivam Dube',        role:'All-rounder',  country:'India'},
+    {name:'Ravindra Jadeja',    role:'All-rounder',  country:'India'},
+    {name:'Deepak Chahar',      role:'Bowler',       country:'India'},
+    {name:'Matheesha Pathirana',role:'Bowler',       country:'Sri Lanka'},
+    {name:'Tushar Deshpande',   role:'Bowler',       country:'India'},
+    {name:'Rachin Ravindra',    role:'All-rounder',  country:'New Zealand'},
+    {name:'Sam Curran',         role:'All-rounder',  country:'England'},
+  ]},
+  {id:'RCB', name:'Royal Challengers Bengaluru', color:'#D41B2C', squad:[
+    {name:'Virat Kohli',        role:'Batter',       country:'India'},
+    {name:'Faf du Plessis',     role:'Batter',       country:'South Africa'},
+    {name:'Rajat Patidar',      role:'Batter',       country:'India'},
+    {name:'Glenn Maxwell',      role:'All-rounder',  country:'Australia'},
+    {name:'Liam Livingstone',   role:'All-rounder',  country:'England'},
+    {name:'Phil Salt',          role:'Wicket-keeper',country:'England'},
+    {name:'Mohammed Siraj',     role:'Bowler',       country:'India'},
+    {name:'Josh Hazlewood',     role:'Bowler',       country:'Australia'},
+    {name:'Yash Dayal',         role:'Bowler',       country:'India'},
+    {name:'Krunal Pandya',      role:'All-rounder',  country:'India'},
+  ]},
+  {id:'KKR', name:'Kolkata Knight Riders',       color:'#3A225D', squad:[
+    {name:'Shreyas Iyer',       role:'Batter',       country:'India'},
+    {name:'Venkatesh Iyer',     role:'All-rounder',  country:'India'},
+    {name:'Andre Russell',      role:'All-rounder',  country:'West Indies'},
+    {name:'Sunil Narine',       role:'All-rounder',  country:'West Indies'},
+    {name:'Rinku Singh',        role:'Batter',       country:'India'},
+    {name:'Phil Salt',          role:'Wicket-keeper',country:'England'},
+    {name:'Varun Chakravarthy', role:'Bowler',       country:'India'},
+    {name:'Mitchell Starc',     role:'Bowler',       country:'Australia'},
+    {name:'Harshit Rana',       role:'Bowler',       country:'India'},
+    {name:'Angkrish Raghuvanshi',role:'Batter',      country:'India'},
+  ]},
+  {id:'DC',  name:'Delhi Capitals',              color:'#0078BC', squad:[
+    {name:'David Warner',       role:'Batter',       country:'Australia'},
+    {name:'Jake Fraser-McGurk', role:'Batter',       country:'Australia'},
+    {name:'Axar Patel',         role:'All-rounder',  country:'India'},
+    {name:'Kuldeep Yadav',      role:'Bowler',       country:'India'},
+    {name:'Tristan Stubbs',     role:'Batter',       country:'South Africa'},
+    {name:'Rishabh Pant',       role:'Wicket-keeper',country:'India'},
+    {name:'Ishant Sharma',      role:'Bowler',       country:'India'},
+    {name:'Mitchell Marsh',     role:'All-rounder',  country:'Australia'},
+    {name:'Mukesh Kumar',       role:'Bowler',       country:'India'},
+    {name:'T Natarajan',        role:'Bowler',       country:'India'},
+  ]},
+  {id:'SRH', name:'Sunrisers Hyderabad',         color:'#F7A721', squad:[
+    {name:'Pat Cummins',        role:'Bowler',       country:'Australia'},
+    {name:'Heinrich Klaasen',   role:'Wicket-keeper',country:'South Africa'},
+    {name:'Travis Head',        role:'Batter',       country:'Australia'},
+    {name:'Abhishek Sharma',    role:'All-rounder',  country:'India'},
+    {name:'Nitish Kumar Reddy', role:'All-rounder',  country:'India'},
+    {name:'Aiden Markram',      role:'Batter',       country:'South Africa'},
+    {name:'T Natarajan',        role:'Bowler',       country:'India'},
+    {name:'Bhuvneshwar Kumar',  role:'Bowler',       country:'India'},
+    {name:'Adam Zampa',         role:'Bowler',       country:'Australia'},
+    {name:'Jaydev Unadkat',     role:'Bowler',       country:'India'},
+  ]},
+  {id:'PBKS',name:'Punjab Kings',                color:'#ED1B24', squad:[
+    {name:'Shikhar Dhawan',     role:'Batter',       country:'India'},
+    {name:'Jonny Bairstow',     role:'Wicket-keeper',country:'England'},
+    {name:'Liam Livingstone',   role:'All-rounder',  country:'England'},
+    {name:'Sam Curran',         role:'All-rounder',  country:'England'},
+    {name:'Arshdeep Singh',     role:'Bowler',       country:'India'},
+    {name:'Kagiso Rabada',      role:'Bowler',       country:'South Africa'},
+    {name:'Rahul Chahar',       role:'Bowler',       country:'India'},
+    {name:'Prabhsimran Singh',  role:'Wicket-keeper',country:'India'},
+    {name:'Rilee Rossouw',      role:'Batter',       country:'South Africa'},
+    {name:'Nathan Ellis',       role:'Bowler',       country:'Australia'},
+  ]},
+  {id:'RR',  name:'Rajasthan Royals',            color:'#254AA5', squad:[
+    {name:'Sanju Samson',       role:'Wicket-keeper',country:'India'},
+    {name:'Jos Buttler',        role:'Wicket-keeper',country:'England'},
+    {name:'Yashasvi Jaiswal',   role:'Batter',       country:'India'},
+    {name:'Shimron Hetmyer',    role:'Batter',       country:'West Indies'},
+    {name:'Trent Boult',        role:'Bowler',       country:'New Zealand'},
+    {name:'Yuzvendra Chahal',   role:'Bowler',       country:'India'},
+    {name:'Ravichandran Ashwin',role:'All-rounder',  country:'India'},
+    {name:'Riyan Parag',        role:'All-rounder',  country:'India'},
+    {name:'Sandeep Sharma',     role:'Bowler',       country:'India'},
+    {name:'Dhruv Jurel',        role:'Wicket-keeper',country:'India'},
+  ]},
+  {id:'GT',  name:'Gujarat Titans',              color:'#1C3B6B', squad:[
+    {name:'Shubman Gill',       role:'Batter',       country:'India'},
+    {name:'David Miller',       role:'Batter',       country:'South Africa'},
+    {name:'Hardik Pandya',      role:'All-rounder',  country:'India'},
+    {name:'Rashid Khan',        role:'Bowler',       country:'Afghanistan'},
+    {name:'Mohammed Shami',     role:'Bowler',       country:'India'},
+    {name:'Wriddhiman Saha',    role:'Wicket-keeper',country:'India'},
+    {name:'Vijay Shankar',      role:'All-rounder',  country:'India'},
+    {name:'Noor Ahmad',         role:'Bowler',       country:'Afghanistan'},
+    {name:'Azmatullah Omarzai', role:'All-rounder',  country:'Afghanistan'},
+    {name:'Sai Sudharsan',      role:'Batter',       country:'India'},
+  ]},
+  {id:'LSG', name:'Lucknow Super Giants',        color:'#A72B2A', squad:[
+    {name:'KL Rahul',           role:'Wicket-keeper',country:'India'},
+    {name:'Quinton de Kock',    role:'Wicket-keeper',country:'South Africa'},
+    {name:'Nicholas Pooran',    role:'Wicket-keeper',country:'West Indies'},
+    {name:'Marcus Stoinis',     role:'All-rounder',  country:'Australia'},
+    {name:'Krunal Pandya',      role:'All-rounder',  country:'India'},
+    {name:'Ravi Bishnoi',       role:'Bowler',       country:'India'},
+    {name:'Mark Wood',          role:'Bowler',       country:'England'},
+    {name:'Mohsin Khan',        role:'Bowler',       country:'India'},
+    {name:'Deepak Hooda',       role:'All-rounder',  country:'India'},
+    {name:'Ayush Badoni',       role:'Batter',       country:'India'},
+  ]},
 ];
 
 // IPL 2026 schedule — loaded from API on startup, this is the fallback
@@ -497,50 +608,16 @@ window.onload = async () => {
     window.history.replaceState({}, '', window.location.pathname);
   }
 
-  // Step 2: load PINs, schedule and teams — all with timeout so login never hangs
+  // Step 2: load PINs — only critical fetch before login
   if (scriptUrl) {
-    const withTimeout = (promise, ms=8000) => Promise.race([
-      promise,
-      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms))
-    ]);
-
-    const [pinsResult, schedResult, teamsResult] = await Promise.allSettled([
-      withTimeout(fetch(`${scriptUrl}?action=getPins`).then(r=>r.json())),
-      withTimeout(fetch(`${scriptUrl}?action=getSchedule`).then(r=>r.json())),
-      withTimeout(fetch(`${scriptUrl}?action=getTeams`).then(r=>r.json())),
-    ]);
-
-    // PINs — critical for login
-    if (pinsResult.status === 'fulfilled') {
-      const j = pinsResult.value;
-      PLAYER_PINS = j.pins || j || {};
+    try {
+      const res  = await fetch(`${scriptUrl}?action=getPins`);
+      const json = await res.json();
+      PLAYER_PINS = json.pins || json || {};
       console.log('PINs loaded:', Object.keys(PLAYER_PINS).length);
-    } else {
-      console.log('PINs failed:', pinsResult.reason);
-    }
-
-    // Schedule — nice to have, fallback to hardcoded 2026
-    if (schedResult.status === 'fulfilled' && schedResult.value.schedule?.length) {
-      SCHEDULE.length = 0;
-      schedResult.value.schedule.forEach((m, i) => SCHEDULE.push({
-        id: m.id || 'm'+(i+1), date: m.date||'', t1: m.t1||'', t2: m.t2||'',
-        venue: m.venue||'', kickoffUTC: m.time || m.kickoffUTC || null,
-      }));
-      console.log('Schedule loaded:', SCHEDULE.length, 'matches');
-    } else {
-      console.log('Schedule failed/empty, using hardcoded:', schedResult.reason||'empty');
-    }
-
-    // Teams — nice to have, fallback to hardcoded
-    if (teamsResult.status === 'fulfilled' && teamsResult.value.teams?.length) {
-      teamsResult.value.teams.forEach(apiTeam => {
-        const existing = TEAMS.find(t => t.id === apiTeam.code);
-        if (existing) { existing.name = apiTeam.name||existing.name; existing.squad = apiTeam.players||[]; }
-        else TEAMS.push({id:apiTeam.code, name:apiTeam.name, color:'#888888', squad:apiTeam.players||[]});
-      });
-      console.log('Teams loaded:', teamsResult.value.teams.length);
-    } else {
-      console.log('Teams failed/empty, using hardcoded:', teamsResult.reason||'empty');
+    } catch(e) {
+      PLAYER_PINS = {};
+      console.log('PINs fetch failed:', e);
     }
   }
 
